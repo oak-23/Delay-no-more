@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import UploadZone from '@/components/UploadZone';
 import { aiModelService } from '@/services/aiModel';
-import { abelianService, AbelianIdentity, MintResult } from '@/services/abelianBlockchain';
+import { abelianService, MintResult } from '@/services/abelianBlockchain';
 
 type MintState = 'idle' | 'analyzing' | 'minting' | 'success' | 'error';
 
@@ -36,12 +36,9 @@ export default function MintPage() {
             }
 
             setMintState('minting');
-            // Trigger MetaMask Popup to connect and get address
-            const identity = await abelianService.connectWallet();
 
-
-            // Mint NFT
-            const result = await abelianService.mintProvenanceNFT(identity, hash, score);
+            // Mint NFT Server-Side (Gasless for user)
+            const result = await abelianService.mintProvenanceServerSide(hash, score);
             setMintResult(result);
             setMintState('success');
 
@@ -79,7 +76,7 @@ export default function MintPage() {
 
                             {mintState === 'idle' && (
                                 <button className="btn-primary" onClick={handleMint} style={{ width: '100%' }}>
-                                    Analyze & Mint on Abelian
+                                    Gasless Mint on Abelian
                                 </button>
                             )}
 

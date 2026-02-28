@@ -149,6 +149,49 @@ export const abelianService = {
     },
 
     /**
+     * Mints an "AI-Generated" provenance NFT directly via the Server API
+     * No wallet connection required.
+     */
+    mintProvenanceServerSide: async (
+        imageHash: string,
+        aiScore: number
+    ): Promise<MintResult> => {
+
+        try {
+            const response = await fetch('/api/mint', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageHash, aiScore })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to mint NFT via server.");
+            }
+
+            const data = await response.json();
+
+            // Save to local storage for the prototype /registry page
+            const registry = JSON.parse(localStorage.getItem('abelian_registry') || '[]');
+            registry.push({
+                txHash: data.txHash,
+                tokenId: data.tokenId,
+                timestamp: data.timestamp,
+                imageHash: data.metadataHash,
+                aiScore: data.aiScore,
+                ownerAddress: data.ownerAddress
+            });
+            localStorage.setItem('abelian_registry', JSON.stringify(registry));
+
+            return data;
+
+        } catch (error: any) {
+            console.error("Server Minting Error:", error);
+            throw new Error(error.message || "Minting request failed.");
+        }
+    },
+
+    /**
      * Queries the QDay blockchain for an exact matching image hash
      */
     verifyExactMatch: async (imageHash: string): Promise<VerificationRecord> => {
