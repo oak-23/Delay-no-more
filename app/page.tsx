@@ -12,7 +12,7 @@ export default function Home() {
                 <div className="glass-panel fade-in" style={{ padding: '4rem', maxWidth: '800px', width: '100%', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
 
                     <h1 style={{ fontSize: '3.5rem', marginBottom: '1rem', lineHeight: 1.1 }}>
-                        The <span className="text-gradient">Abelian AI</span> Authenticator
+                        <span className="text-gradient">ExposAI</span>
                     </h1>
 
                     <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: 1.6 }}>

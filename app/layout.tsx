@@ -7,8 +7,8 @@ import Footer from '@/components/Footer';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-    title: 'Abelian AI Authenticator | Quantum-Safe Provenance Hub',
-    description: 'A revolutionary web platform acting as a trust layer for the AI age. Mint and verify AI content securely on the Abelian blockchain.',
+    title: 'ExposAI | Quantum-Safe Provenance Hub',
+    description: 'ExposAI is a revolutionary web platform acting as a trust layer for the AI age. Mint and verify AI content securely on the Abelian blockchain.',
 };
 
 export default function RootLayout({

@@ -80,6 +80,8 @@ export default function VerifyPage() {
                             message={result.message}
                             score={result.score}
                             txHash={result.txHash}
+                            tokenId={result.tokenId}
+                            explanation={result.explanation}
                         />
                     )}
 

@@ -22,10 +22,10 @@ export default function Header() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: 'white', fontWeight: 'bold'
                 }}>
-                    A
+                    EA
                 </div>
                 <Link href="/" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.5px' }}>
-                    Abelian <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>Trust</span>
+                    <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>ExposAI</span>
                 </Link>
             </div>
 
@@ -35,19 +35,7 @@ export default function Header() {
                 <Link href="/registry" style={{ fontSize: '0.95rem', fontWeight: 500 }}>Registry</Link>
             </nav>
 
-            <div>
-                <button style={{
-                    background: 'transparent',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer'
-                }}>
-                    Connect Node
-                </button>
-            </div>
+
         </header>
     );
 }
