@@ -12,7 +12,6 @@ import fs from 'fs';
 import path from 'path';
 import { aiModelService } from '@/services/aiModel';
 import { imageProcessingService } from '@/services/imageProcessing';
-import { supabase } from '@/services/supabase';
 
 const QDAY_CONTRACT_ADDRESS = "0x14fEd8c1327479779fAe2cA7CE07237bAF498ad4";
 
@@ -50,15 +49,13 @@ export async function POST(req: Request) {
         const contract = new ethers.Contract(QDAY_CONTRACT_ADDRESS, CONTRACT_ABI, wallet);
 
         // 3. Check if this image hash is already minted
-        try {
-            const alreadyRegistered = await contract.isHashRegistered(imageHash);
-            if (alreadyRegistered) {
-                return NextResponse.json({
-                    error: 'This exact image has already been minted on the QDay blockchain.'
-                }, { status: 409 });
-            }
-        } catch {
-            // If the check fails, proceed anyway (the contract will revert if duplicate)
+        console.log(`[Mint API] Checking blockchain for hash: ${imageHash}`);
+        const alreadyRegistered = await contract.isHashRegistered(imageHash);
+        if (alreadyRegistered) {
+            console.warn(`[Mint API] Duplicate detected on-chain for hash: ${imageHash}`);
+            return NextResponse.json({
+                error: 'This exact image has already been minted on the QDay blockchain.'
+            }, { status: 409 });
         }
 
         // 4. Run AI analysis (client-side mock for now)
@@ -82,22 +79,24 @@ export async function POST(req: Request) {
         const tokenId = `qnft_${receipt.blockNumber}`;
         const timestamp = new Date(Number(block?.timestamp) * 1000).toISOString();
 
-        // 8. Update Global Similarity Registry in Supabase
+        // 8. Update Server-Side Similarity Cache
         try {
-            const { error: dbError } = await supabase
-                .from('provenance_registry')
-                .insert([{
-                    sha256: imageHash,
-                    dhash: dHash,
-                    token_id: tokenId,
-                    ai_score: aiScore,
-                    tx_hash: receipt.hash,
-                    owner_address: wallet.address
-                }]);
+            const cachePath = path.join(process.cwd(), 'data', 'similarity_cache.json');
+            // Ensure data directory exists
+            if (!fs.existsSync(path.join(process.cwd(), 'data'))) {
+                fs.mkdirSync(path.join(process.cwd(), 'data'));
+            }
 
-            if (dbError) throw dbError;
+            const cache = fs.existsSync(cachePath) ? JSON.parse(fs.readFileSync(cachePath, 'utf8')) : [];
+            cache.push({
+                sha256: imageHash,
+                dHash: dHash,
+                tokenId: tokenId,
+                timestamp: timestamp
+            });
+            fs.writeFileSync(cachePath, JSON.stringify(cache, null, 2));
         } catch (err) {
-            console.warn('[Mint API] Database registry sync failed:', err);
+            console.warn('[Mint API] Cache sync failed:', err);
         }
 
         return NextResponse.json({

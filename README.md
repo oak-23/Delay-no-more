@@ -11,7 +11,6 @@ The system is built on a modern **Next.js 15** (App Router) foundation, utilizin
 ### Core Technology Stack
 - **Frontend**: Next.js 15, TypeScript, React 19, Vanilla CSS (Glassmorphism).
 - **Blockchain**: QDay Testnet (Abelian Layer 2), `ethers.js` v6.
-- **Database**: Supabase (PostgreSQL) for persistent dHash similarity search.
 - **Smart Contracts**: Solidity 0.8.19 (EVM Paris-compatible), OpenZeppelin v4.9.0.
 - **AI Engine**: AWS Bedrock (Llama 3.2 90B Vision), multimodal analysis via Converse API.
 

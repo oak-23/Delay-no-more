@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/services/supabase';
 
 interface RegistryItem {
-    tx_hash: string;
-    token_id: string;
-    created_at: string;
-    sha256: string;
-    ai_score: number;
-    owner_address: string;
+    txHash: string;
+    tokenId: string;
+    timestamp: string;
+    imageHash: string;
+    aiScore: number;
+    ownerAddress: string;
 }
 
 export default function RegistryPage() {
@@ -18,15 +17,19 @@ export default function RegistryPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const loadRegistry = async () => {
+        // In production, this would query the Abelian network or an indexer.
+        // For the prototype, we read from the mocked local storage.
+        const loadRegistry = () => {
             try {
-                const { data, error } = await supabase
-                    .from('provenance_registry')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                if (data) setItems(data);
+                const data = localStorage.getItem('abelian_registry');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    // Sort newest first
+                    parsed.sort((a: RegistryItem, b: RegistryItem) =>
+                        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                    );
+                    setItems(parsed);
+                }
             } catch (e) {
                 console.error("Failed to load registry", e);
             } finally {
@@ -55,7 +58,7 @@ export default function RegistryPage() {
 
             {isLoading ? (
                 <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
-                    Loading registry data from Supabase...
+                    Loading registry data from Abelian nodes...
                 </div>
             ) : items.length === 0 ? (
                 <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center' }}>
@@ -70,8 +73,8 @@ export default function RegistryPage() {
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: '1rem' }}>
-                    {items.map((item: RegistryItem) => (
-                        <div key={item.tx_hash} className="glass-panel fade-in" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem', transition: 'transform 0.2s ease', cursor: 'pointer' }}
+                    {items.map((item) => (
+                        <div key={item.txHash} className="glass-panel fade-in" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem', transition: 'transform 0.2s ease', cursor: 'pointer' }}
                             onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(8px)'}
                             onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}>
 
@@ -88,27 +91,27 @@ export default function RegistryPage() {
                             <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 1fr 1fr auto', gap: '1.5rem', alignItems: 'center' }}>
                                 <div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>Token ID</div>
-                                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.token_id}</div>
+                                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.tokenId}</div>
                                 </div>
 
                                 <div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>Owner</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {item.owner_address?.substring(0, 12)}...
+                                        {item.ownerAddress.substring(0, 12)}...
                                     </div>
                                 </div>
 
                                 <div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>Date</div>
                                     <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                                        {new Date(item.created_at).toLocaleDateString()}
+                                        {new Date(item.timestamp).toLocaleDateString()}
                                     </div>
                                 </div>
 
                                 <div style={{ textAlign: 'right' }}>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>Tx Hash</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--accent-secondary)' }}>
-                                        {item.tx_hash.substring(0, 10)}...
+                                        {item.txHash.substring(0, 10)}...
                                     </div>
                                 </div>
                             </div>

@@ -5,7 +5,6 @@ import { abelianService } from '@/services/abelianBlockchain';
 import { aiModelService } from '@/services/aiModel';
 import { analyzeImageWithBedrock } from '@/services/bedrockAI';
 import { imageProcessingService } from '@/services/imageProcessing';
-import { supabase } from '@/services/supabase';
 
 export async function POST(req: Request) {
     try {
@@ -39,17 +38,15 @@ export async function POST(req: Request) {
             const buffer = Buffer.from(arrayBuffer);
             const dHash = await imageProcessingService.generateDHash(buffer);
 
-            // Query all existing fingerprints from Supabase
-            const { data: registry, error: dbError } = await supabase
-                .from('provenance_registry')
-                .select('dhash, token_id');
+            const cachePath = path.join(process.cwd(), 'data', 'similarity_cache.json');
+            if (fs.existsSync(cachePath)) {
+                const cache = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
 
-            if (!dbError && registry) {
                 let bestMatch = null;
                 let highestSimilarity = 0;
 
-                for (const entry of registry) {
-                    const similarity = imageProcessingService.calculateSimilarity(dHash, entry.dhash);
+                for (const entry of cache) {
+                    const similarity = imageProcessingService.calculateSimilarity(dHash, entry.dHash);
                     if (similarity > highestSimilarity) {
                         highestSimilarity = similarity;
                         bestMatch = entry;
@@ -61,8 +58,8 @@ export async function POST(req: Request) {
                     return NextResponse.json({
                         status: 'similar_match',
                         score: highestSimilarity,
-                        tokenId: bestMatch.token_id,
-                        message: `Potential derivative detected! This image is ${(highestSimilarity * 100).toFixed(1)}% visually similar to an existing NFT (ID: ${bestMatch.token_id}) on the ExposAI registry.`
+                        tokenId: bestMatch.tokenId,
+                        message: `Potential derivative detected! This image is ${(highestSimilarity * 100).toFixed(1)}% visually similar to an existing NFT (ID: ${bestMatch.tokenId}) on the Abelian registry.`
                     });
                 }
             }
